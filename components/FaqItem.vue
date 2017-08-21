@@ -68,7 +68,7 @@
       </div>
       <h4 class="title">{{ title }}</h4>
     </div>
-    <transition name="slide-fade">
+    <transition v-on:before-enter="getFaqHeight" v-on:enter="slideDown" v-on:leave="slideUp" name="slide-fade">
       <div v-if="open" class="answer">
         <slot/>
       </div>
@@ -83,12 +83,40 @@ export default {
   },
   data() {
     return {
-      open: false
+      open: false,
+      faqHeight: 0
     }
   },
   computed: {
     arrowDirection() {
       return this.open ? 'right' : 'down'
+    }
+  },
+  methods: {
+    getFaqHeight: function() {
+      const faq = this.$el.closest('.faq')
+      this.faqHeight = faq.clientHeight
+      faq.style.height = `${this.faqHeight}px`
+    },
+    slideDown: function() {
+      const faq = this.$el.closest('.faq')
+      const old = this.faqHeight
+      const now = faq.scrollHeight
+      if (old < now) {
+        window.requestAnimationFrame(() => {
+          faq.style.transition = '0.25s linear'
+
+          window.requestAnimationFrame(() => {
+            faq.style.height = `${now}px`
+          })
+        })
+      } else {
+        faq.style.height = 'auto'
+      }
+    },
+    slideUp: function() {
+      const faq = this.$el.closest('.faq')
+      faq.style.height = 'auto'
     }
   }
 }
